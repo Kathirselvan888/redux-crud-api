@@ -1,14 +1,22 @@
-import React from 'react'
+// UsersList.js
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { deleteUser } from './usersSlice'
-import { Link } from 'react-router-dom'
+import { fetchUsers, deleteUser, setEditingUserId } from './usersSlice'
 
 const UsersList = () => {
   const dispatch = useDispatch()
   const users = useSelector((state) => state.users.list)
 
+  useEffect(() => {
+    dispatch(fetchUsers())
+  }, [dispatch])
+
   const handleDelete = (id) => {
     dispatch(deleteUser(id))
+  }
+
+  const handleEdit = (id) => {
+    dispatch(setEditingUserId(id)) // Set the user ID for editing in Redux
   }
 
   return (
@@ -21,20 +29,18 @@ const UsersList = () => {
             key={user.id}
           >
             {user.name} ({user.email}) {user.isAdmin ? '(Admin)' : ''}
-            <div>
-              <Link
-                to={`/edit-user/${user.id}`}
-                className='btn btn-info btn-sm mr-2'
-              >
-                Edit
-              </Link>
-              <button
-                className='btn btn-danger btn-sm'
-                onClick={() => handleDelete(user.id)}
-              >
-                Delete
-              </button>
-            </div>
+            <button
+              className='btn btn-info btn-sm'
+              onClick={() => handleEdit(user.id)}
+            >
+              Edit
+            </button>
+            <button
+              className='btn btn-danger btn-sm'
+              onClick={() => handleDelete(user.id)}
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>

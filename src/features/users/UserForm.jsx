@@ -1,47 +1,53 @@
+// UserForm.js
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { addUser, updateUser } from './usersSlice'
-import { useNavigate, useParams } from 'react-router-dom'
+import {
+  addUser,
+  updateUser,
+  setEditingUserId,
+  resetEditingUserId,
+} from './usersSlice'
 
 const UserForm = () => {
-  const { userId } = useParams()
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const users = useSelector((state) => state.users.list)
-  const userToEdit = users.find((user) => user.id === parseInt(userId))
-
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+
+  const dispatch = useDispatch()
+  const editingUserId = useSelector((state) => state.users.editingUserId)
+  const users = useSelector((state) => state.users.list)
+  const userToEdit = users.find((user) => user.id === editingUserId)
 
   useEffect(() => {
     if (userToEdit) {
       setName(userToEdit.name)
       setEmail(userToEdit.email)
       setIsAdmin(userToEdit.isAdmin)
+    } else {
+      resetForm()
     }
-  }, [userToEdit])
+  }, [editingUserId, userToEdit])
+
+  const resetForm = () => {
+    setName('')
+    setEmail('')
+    setIsAdmin(false)
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const newUser = {
-      id: userToEdit ? userToEdit.id : Date.now(),
-      name,
-      email,
-      isAdmin,
-    }
-    if (userToEdit) {
-      dispatch(updateUser(newUser))
+    if (editingUserId) {
+      dispatch(updateUser({ id: editingUserId, name, email, isAdmin }))
     } else {
-      dispatch(addUser(newUser))
+      dispatch(addUser({ name, email, isAdmin }))
     }
-
-    navigate('/')
+    resetForm()
+    dispatch(resetEditingUserId()) // Reset the editingUserId after submission
   }
 
   return (
     <form onSubmit={handleSubmit} className='container mt-3'>
-      <h2>{userToEdit ? 'Edit User' : 'Add User'}</h2>
+      <h2>{editingUserId ? 'Edit User' : 'Add User'}</h2>
       <div className='form-group'>
         <label>Name</label>
         <input
@@ -72,7 +78,7 @@ const UserForm = () => {
         <label className='form-check-label'>Is Admin</label>
       </div>
       <button type='submit' className='btn btn-primary mt-3'>
-        {userToEdit ? 'Update User' : 'Add User'}
+        {editingUserId ? 'Update User' : 'Add User'}
       </button>
     </form>
   )

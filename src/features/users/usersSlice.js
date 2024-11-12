@@ -1,36 +1,56 @@
-import { createSlice } from '@reduxjs/toolkit'
-import {
-  loadUsersFromLocalStorage,
-  saveUsersToLocalStorage,
-} from './localStorage'
+// usersSlice.js
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import UserService from './UserService'
 
-const initialState = {
-  list: loadUsersFromLocalStorage(),
-}
+export const fetchUsers = createAsyncThunk(
+  'users/fetchUsers',
+  UserService.getUsers
+)
+export const addUser = createAsyncThunk('users/addUser', UserService.addUser)
+export const updateUser = createAsyncThunk(
+  'users/updateUser',
+  UserService.updateUser
+)
+export const deleteUser = createAsyncThunk(
+  'users/deleteUser',
+  UserService.deleteUser
+)
 
 const usersSlice = createSlice({
   name: 'users',
-  initialState,
+  initialState: {
+    list: [],
+    loading: false,
+    editingUserId: null, // New state for editing user ID
+  },
   reducers: {
-    addUser: (state, action) => {
-      state.list.push(action.payload)
-      saveUsersToLocalStorage(state.list)
+    setEditingUserId: (state, action) => {
+      state.editingUserId = action.payload
     },
-    updateUser: (state, action) => {
-      const index = state.list.findIndex(
-        (user) => user.id === action.payload.id
-      )
-      if (index !== -1) {
+    resetEditingUserId: (state) => {
+      state.editingUserId = null
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.list = action.payload
+      })
+      .addCase(addUser.fulfilled, (state, action) => {
+        state.list.push(action.payload)
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        const index = state.list.findIndex(
+          (user) => user.id === action.payload.id
+        )
         state.list[index] = action.payload
-        saveUsersToLocalStorage(state.list)
-      }
-    },
-    deleteUser: (state, action) => {
-      state.list = state.list.filter((user) => user.id !== action.payload)
-      saveUsersToLocalStorage(state.list)
-    },
+      })
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.list = state.list.filter((user) => user.id !== action.payload)
+      })
   },
 })
 
-export const { addUser, updateUser, deleteUser } = usersSlice.actions
+export const { setEditingUserId, resetEditingUserId } = usersSlice.actions
+
 export default usersSlice.reducer
