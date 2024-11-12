@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "isAdmin": false
+    },
+    {
+      "id": "8d11",
+      "name": "ssxaxa",
+      "email": "asxaxa@gamil.com",
+      "isAdmin": true
+    }
+  ]
+}
