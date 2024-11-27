@@ -1,11 +1,11 @@
-import UserInput from './features/UserInput'
-import UserList from './features/UserList'
+import TaskForm from './features/TaskForm'
+import TaskList from './features/TaskList'
 
 const App = () => {
   return (
     <>
-      <UserInput />
-      <UserList />
+      <TaskForm />
+      <TaskList />
     </>
   )
 }
